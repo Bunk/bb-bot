@@ -12,5 +12,6 @@
   "hubot-voting",
   "hubot-wikipedia",
   "hubot-reaction",
-  "hubot-plusplus"
+  "hubot-plusplus",
+  "hubot-mute"
 ]
