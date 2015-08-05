@@ -8,6 +8,8 @@
     "coffee-script": "^1.9.3",
     "hubot": "^2.13.2",
     "hubot-azure-scripts": "^0.1.6",
+    "hubot-cron": "^0.2.9",
+    "hubot-cron-checker": "0.0.4",
     "hubot-diagnostics": "0.0.1",
     "hubot-eyebleach": "0.0.6",
     "hubot-google-images": "^0.1.5",
@@ -26,7 +28,8 @@
     "hubot-slack": "^3.3.0",
     "hubot-standup-alarm": "0.0.6",
     "hubot-voting": "^1.0.0",
-    "hubot-wikipedia": "0.0.1"
+    "hubot-wikipedia": "0.0.1",
+    "time": "^0.11.3"
   },
   "engines": {
     "node": "0.12.x"
