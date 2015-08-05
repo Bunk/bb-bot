@@ -11,5 +11,6 @@
   "hubot-standup-alarm",
   "hubot-voting",
   "hubot-wikipedia",
-  "hubot-reaction"
+  "hubot-reaction",
+  "hubot-plusplus"
 ]
