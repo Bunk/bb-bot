@@ -10,6 +10,7 @@
     "hubot-azure-scripts": "^0.1.6",
     "hubot-cron": "^0.2.9",
     "hubot-cron-checker": "0.0.4",
+    "hubot-cybernetic": "0.0.1",
     "hubot-diagnostics": "0.0.1",
     "hubot-eyebleach": "0.0.6",
     "hubot-google-images": "^0.1.5",
