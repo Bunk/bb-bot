@@ -45,6 +45,7 @@ module.exports = (robot) ->
 _sanitize = (str) ->
   str = str.replace(/\s+/g, '-')
   str = str.replace(/"/g, '')
+  str = str.replace(/\?/g, '~q')
   str.toLowerCase()
 
 _queryApi = (msg, parts, handler) ->
