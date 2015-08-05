@@ -9,5 +9,7 @@
   "hubot-rules",
   "hubot-shipit",
   "hubot-standup-alarm",
-  "hubot-voting"
+  "hubot-voting",
+  "hubot-wikipedia",
+  "hubot-reaction"
 ]
