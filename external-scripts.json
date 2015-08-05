@@ -15,8 +15,5 @@
   "hubot-plusplus",
   "hubot-mute",
   "hubot-memegen-link",
-  "hubot-eyebleach",
-  "hubot-cron",
-  "hubot-cron-checker",
-  "hubot-cybernetic"
+  "hubot-eyebleach"
 ]
