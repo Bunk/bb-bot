@@ -12,7 +12,7 @@
 #   None
 #
 # Author:
-#   MrSaints
+#   JD Courtoy
 
 MEMEGEN_API_URL = "http://memegen.link"
 
