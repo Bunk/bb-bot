@@ -27,6 +27,7 @@
     "hubot-standup-alarm": "0.0.6",
     "hubot-voting": "^1.0.0",
     "hubot-wikipedia": "0.0.1",
+    "q": "^1.4.1",
     "underscore": "^1.8.3"
   },
   "engines": {
