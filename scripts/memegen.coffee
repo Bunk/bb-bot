@@ -6,7 +6,7 @@
 #
 # Commands:
 #   hubot meme list - Returns available meme templates from Memegen.link and their respective URLs (keys)
-#   hubot meme <template> <text> <text> - Creates a <template> meme using <text> and returns links to it
+#   hubot meme <template> top: <text> bottom: <text> - Creates a <template> meme using <text> and returns links to it
 #
 # Notes:
 #   None
@@ -29,7 +29,7 @@ module.exports = (robot) ->
           _templateCache += "#{template} | Key: #{key} | Example: http://memegen.link/#{key}/hello/world.jpg\n"
         res.send _templateCache
 
-    robot.respond /meme (\w+) ("[^"]+"|[^\s]+) ("[^"]+"|[^\s]+)/i, (res) ->
+    robot.respond /meme (\w+) top: (.+) bottom: (.+)/i, (res) ->
       template = res.match[1]
       topText = _sanitize(res.match[2])
       bottomText = _sanitize(res.match[3])
