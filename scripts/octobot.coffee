@@ -18,6 +18,7 @@ _ = require('lodash')
 q = require('q')
 util = require('util')
 semver = require('semver')
+Table = require('cli-table')
 
 apikey = process.env.HUBOT_OCTOPUS_KEY
 urlBase = process.env.HUBOT_OCTOPUS_URL_BASE
@@ -47,6 +48,24 @@ module.exports = (robot) ->
         msg.send m
       .catch (error) ->
         msg.send error
+
+  robot.respond /(deploy|delpoy) status table$/i, (msg) ->
+    getItems(robot, 'api/dashboard')
+      .then (data) ->
+        table = new Table
+          head: ['_Project_', '_Env_', '_Version_', '_State_']
+          colWidths: [20, 10, 12, 10]
+        data.Projects.forEach (project) ->
+          data.Environments.forEach (env, i) ->
+            item = _.find(data.Items, (item) -> item.ProjectId == project.Id && item.EnvironmentId == env.Id)
+            name = (project.Name if i == 0) || ''
+            version = (item.ReleaseVersion if item) || ''
+            state = (item.State if item) || ''
+            row = [name, env.Name, version, state]
+            table.push(row)
+
+        msg.send "_We're currently rolling with_: \n\n#{table.toString()}"
+
 
   robot.respond /(promote) (.+) from (.+) to (.+)/i, (msg) ->
     projectName = msg.match[2]
