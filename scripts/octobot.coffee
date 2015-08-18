@@ -53,7 +53,7 @@ module.exports = (robot) ->
     getItems(robot, 'api/dashboard')
       .then (data) ->
         table = new Table
-          head: ['_Project_', '_Env_', '_Version_', '_State_']
+          head: ['Project', 'Env', 'Version', 'State']
           colWidths: [20, 10, 12, 10]
         data.Projects.forEach (project) ->
           data.Environments.forEach (env, i) ->
@@ -65,7 +65,7 @@ module.exports = (robot) ->
             table.push(row)
 
         table = table.toString().replace(/\t/g, '    ')
-        msg.send "_We're currently rolling with_: \n\n#{table}"
+        msg.send "_We're currently rolling with_: \n\n```\n#{table}\n```"
 
 
   robot.respond /(promote) (.+) from (.+) to (.+)/i, (msg) ->
