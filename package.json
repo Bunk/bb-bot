@@ -5,6 +5,7 @@
   "author": "JD Courtoy <jcourtoy@nc2media.com>",
   "description": "A simple, helpful robot for all-the-things in the Lab, Bebe.",
   "dependencies": {
+    "cli-table": "^0.3.1",
     "coffee-script": "^1.9.3",
     "hubot": "^2.13.2",
     "hubot-azure-scripts": "^0.1.6",
@@ -27,7 +28,9 @@
     "hubot-standup-alarm": "0.0.6",
     "hubot-voting": "^1.0.0",
     "hubot-wikipedia": "0.0.1",
+    "lodash": "^3.10.1",
     "q": "^1.4.1",
+    "semver": "^5.0.1",
     "underscore": "^1.8.3"
   },
   "engines": {

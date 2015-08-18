@@ -2,9 +2,9 @@
 #   Hubot interface to octopus deploy
 #
 # Commands:
-#   hubot octo promote <project> from <env1> to <env2> - Hubot deploys the latest release of <project> on <env1> to <env2>
-#   hubot octo deploy <project> version <version> to <env> - Hubot deploys the specified version of <project> to <env>
-#   hubot octo status - Hubot prints a dashboard of environments and currently deployed versions.
+#   hubot promote <project> from <env1> to <env2> - Hubot promotes <project> on <env1> to <env2>
+#   hubot deploy <project> version <version> to <env> - Hubot deploys the specified version of <project> to <env>
+#   hubot deploy status - Hubot prints a dashboard of environments and currently deployed versions.
 #
 # Configuration:
 #   HUBOT_OCTOPUS_URL_BASE: required
@@ -14,21 +14,22 @@
 #   JD Courtoy
 
 
-_ = require('underscore')._
+_ = require('lodash')
 q = require('q')
 util = require('util')
+semver = require('semver')
 
 apikey = process.env.HUBOT_OCTOPUS_KEY
 urlBase = process.env.HUBOT_OCTOPUS_URL_BASE
 
 module.exports = (robot) ->
-  robot.respond /(octopus|octo) status$/i, (msg) ->
+  robot.respond /(deploy|delpoy) status$/i, (msg) ->
     getItems(robot, "api/dashboard")
       .then (data) ->
-        m = "We're currently rolling with:"
+        m = "_We're currently rolling with_:"
         for proj in data.Projects
           if proj
-            m = m + "\n Project: " + proj.Name
+            m = m + "\n\n *Project*: " + proj.Name
             projItems = _.filter(data.Items, (i) -> if i.ProjectId == proj.Id then i)
 
             if projItems && projItems.length > 0
@@ -38,7 +39,8 @@ module.exports = (robot) ->
                   tabset = enviro.Name.length > "\t" ? " : \t" : " : \t\t"
                   formata = "\n  > %s\t\t : %s - %s"
                   formatb = "\n  > %s\t : %s - %s"
-                  format = if enviro.Name.length >= 5 then formatb else formata
+                  format = if enviro.Name.length >= 4 then formatb else formata
+                  robot.logger.info format
                   m = m + util.format(format, enviro.Name, item.ReleaseVersion, item.State)
             else
               m = m + "\n  > No Deployments"
@@ -46,10 +48,42 @@ module.exports = (robot) ->
       .catch (error) ->
         msg.send error
 
-  robot.respond /(octo promote) (.+) (from) (.+) (to) (.+)/i, (msg) ->
+  robot.respond /(promote) (.+) from (.+) to (.+)/i, (msg) ->
     projectName = msg.match[2]
-    sourceEnvName = msg.match[4]
-    targetEnvName = msg.match[6]
+    sourceEnvName = msg.match[3]
+    targetEnvName = msg.match[4]
+
+    getItem(robot, 'api/environments', findByName(sourceEnvName))
+      .then (sourceEnv) ->
+        if (!sourceEnv)
+          throw new Error("Could not find environment #{sourceEnvName}")
+
+        this.sourceEnv = sourceEnv
+        getItem(robot, 'api/environments', findByName(targetEnvName))
+      .then (targetEnv) ->
+        if (!targetEnv)
+          throw new Error("Could not find environment #{targetEnvName}")
+
+        this.targetEnv = targetEnv
+        getItems(robot, 'api/projects', filterByName(projectName))
+      .then (projects) ->
+        if (!projects && !projects.length)
+          throw new Error("Could not find any projects starting with #{projectName}")
+
+        promises = _.map projects.Items, (project) ->
+          promoteRelease(robot, msg, project, this.sourceEnv, this.targetEnv)
+
+        q.all promises
+      .then (releases) ->
+        releases.forEach (release) ->
+          msg.send "Promoted *#{release.project.Name} (#{release.version}) from #{release.sourceEnv.Name} to #{release.targetEnv.Name}"
+      .catch (error) ->
+        msg.send error
+
+  robot.respond /(deploy|delpoy) (.+) version (.+) to (.+)/i, (msg) ->
+    projectName = msg.match[2]
+    version = msg.match[3]
+    targetEnvName = msg.match[4]
 
     getItem(robot, "api/projects", findByName(projectName))
       .then (project) ->
@@ -57,54 +91,23 @@ module.exports = (robot) ->
           throw new Error("Could not find project #{projectName}");
 
         this.project = project
-        getItem(robot, "api/environments", findByName(sourceEnvName))
-      .then (sourceEnv) ->
-        if (!sourceEnv)
-          throw new Error("Could not find environment #{sourceEnvName}");
-
-        this.sourceEnv = sourceEnv
         getItem(robot, "api/environments", findByName(targetEnvName))
       .then (targetEnv) ->
         if (!targetEnv)
           throw new Error("Could not find environment #{targetEnvName}");
 
         this.targetEnv = targetEnv
-        mostRecentRelease(robot, this.project)
-      .then (prevRelease) ->
-        if (!prevRelease)
+        findRelease(robot, this.project, version)
+      .then (release) ->
+        if (!release)
           throw new Error("Could not find previous release");
 
-        this.prevRelease = prevRelease
-        deployRelease(robot, prevRelease, targetEnv)
+        this.release = release
+        deployRelease(robot, release, targetEnv)
       .then (deployment) ->
-        msg.send "Promoted #{this.prevRelease.Version} from #{sourceEnvName} to #{targetEnvName}"
+        msg.send "Deploying #{this.release.Version} to #{targetEnvName}"
       .catch (error) ->
         msg.send error
-
-  robot.respond /(octopus|octo) deploy (.+) version (.+) (to) (.+)/i, (msg) ->
-    projectName = msg.match[2]
-    version = msg.match[3]
-    targetEnvName = msg.match[5]
-    getItem(robot, "api/projects", findByName(projectName))
-    .then (project) ->
-      if (!project)
-        throw new Error("Could not find project #{projectName}");
-      this.project = project
-      getItem(robot, "api/environments", findByName(targetEnvName))
-    .then (targetEnv) ->
-      if (!targetEnv)
-        throw new Error("Could not find environment #{targetEnvName}");
-      this.targetEnv = targetEnv
-      findRelease(robot, this.project, version)
-    .then (release) ->
-      if (!release)
-        throw new Error("Could not find previous release");
-      this.release = release
-      deployRelease(robot, release, targetEnv)
-    .then (deployment) ->
-      msg.send "Promoting #{this.release.Version} to #{targetEnvName}"
-    .catch (error) ->
-      msg.send error
 
 createHTTPCall = (robot, urlPath) ->
   robot.http("#{urlBase}/#{urlPath}")
@@ -125,6 +128,24 @@ deployRelease = (robot, release, environment) ->
     else
       deferred.resolve (JSON.parse body)
   deferred.promise
+
+promoteRelease = (robot, msg, project, sourceEnv, targetEnv) ->
+  mostRecentReleaseByEnv(robot, project, sourceEnv)
+    .then (sourceRelease) ->
+      if (!sourceRelease)
+        throw new Error("Could not find previous release from #{sourceEnv.Name}");
+
+      robot.logger.info "#{project.Name} [#{sourceEnv.Name}] : v#{sourceRelease.Version}"
+
+      this.sourceRelease = sourceRelease
+      deployRelease(robot, sourceRelease, targetEnv)
+    .then (deployment) ->
+      promotion =
+        deployment: deployment
+        project: project
+        sourceEnv: sourceEnv
+        targetEnv: targetEnv
+        version: this.sourceRelease.Version
 
 getItems = (robot, urlPath) ->
   deferred = q.defer()
@@ -151,18 +172,33 @@ getItem = (robot, urlPath, selectFunc) ->
 findByName = (name)->
   (items) ->_.find(items, (item) -> item.Name == name)
 
+filterByName = (name) ->
+  (items) -> _.filter(items, (item) -> _.startsWith(item.Name.toLowerCase(), name.toLowerCase()))
+
 findByFirst = () ->
   (items) -> _.first(items)
 
 findByVersion = (version) ->
   (items) -> _.find(items, (item)-> item.Version == version)
 
+findByEnvironment = (environment) ->
+  (items) -> _.find(items, (item) -> item.EnvironmentId == environment.Id)
+
+findRelease = (robot, project, version) ->
+  releasesUrl = project.Links["Releases"].replace /{.*}/,""
+  getItem(robot, releasesUrl, findByVersion(version))
+
+mostRecentDeployment = (robot, project, environment) ->
+  getItem(robot, 'api/dashboard/dynamic', (items) ->
+    filtered = _.filter(items, (item) -> item.EnvironmentId == environment.Id && item.ProjectId == project.Id)
+    filtered.sort(semver.rcompare)
+    _.first(filtered))
+
 mostRecentRelease = (robot, project) ->
   releasesUrl = project.Links["Releases"].replace /{.*}/, ""
   getItem(robot, releasesUrl, findByFirst())
   .then (val) -> val
 
-findRelease = (robot, project, version) ->
-  releasesUrl = project.Links["Releases"].replace /{.*}/,""
-  getItem(robot, releasesUrl, findByVersion(version))
-  .then (val) -> val
+mostRecentReleaseByEnv = (robot, project, env) ->
+  mostRecentDeployment(robot, project, env)
+    .then (deployment) -> findRelease(robot, project, deployment.ReleaseVersion)
