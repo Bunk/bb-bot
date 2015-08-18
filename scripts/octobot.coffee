@@ -64,7 +64,8 @@ module.exports = (robot) ->
             row = [name, env.Name, version, state]
             table.push(row)
 
-        msg.send "_We're currently rolling with_: \n\n#{table.toString()}"
+        table = table.toString().replace(/\t/g, '    ')
+        msg.send "_We're currently rolling with_: \n\n#{table}"
 
 
   robot.respond /(promote) (.+) from (.+) to (.+)/i, (msg) ->
