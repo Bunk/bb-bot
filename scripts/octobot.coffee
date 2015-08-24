@@ -74,7 +74,7 @@ module.exports = (robot) ->
     targetEnvName = msg.match[4]
 
     msg.send "I'm going to try and promote #{projectName} from #{sourceEnvName} to #{targetEnvName}"
-    
+
     getItem(robot, 'api/environments', findByName(sourceEnvName))
       .then (sourceEnv) ->
         if (!sourceEnv)
@@ -157,17 +157,10 @@ promoteRelease = (robot, msg, project, sourceEnv, targetEnv) ->
       if (!sourceRelease)
         throw new Error("Could not find previous release from #{sourceEnv.Name}");
 
-      robot.logger.info "#{project.Name} [#{sourceEnv.Name}] : v#{sourceRelease.Version}"
-
       this.sourceRelease = sourceRelease
       deployRelease(robot, sourceRelease, targetEnv)
     .then (deployment) ->
-      promotion =
-        deployment: deployment
-        project: project
-        sourceEnv: sourceEnv
-        targetEnv: targetEnv
-        version: this.sourceRelease.Version
+      msg.send "Promoted *#{project.Name} (#{this.sourceRelease.version}) from #{sourceEnv.Name} to #{targetEnv.Name}"
 
 getItems = (robot, urlPath) ->
   deferred = q.defer()
