@@ -68,11 +68,13 @@ module.exports = (robot) ->
         msg.send "_We're currently rolling with_: \n\n```\n#{table}\n```"
 
 
-  robot.respond /(promote) (.+) from (.+) to (.+)/i, (msg) ->
+  robot.respond /(promote) (.+) from (.+) to (.+)$/i, (msg) ->
     projectName = msg.match[2]
     sourceEnvName = msg.match[3]
     targetEnvName = msg.match[4]
 
+    msg.send "I'm going to try and promote #{projectName} from #{sourceEnvName} to #{targetEnvName}"
+    
     getItem(robot, 'api/environments', findByName(sourceEnvName))
       .then (sourceEnv) ->
         if (!sourceEnv)
