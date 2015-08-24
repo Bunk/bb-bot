@@ -13,7 +13,7 @@ module.exports = (robot) ->
   adorations = ['sweetheart', 'baby', 'honey', 'darlin\'']
   emoticons_happy = [':kissing_heart:', ':grinning:', ':heart_eyes:', ':relieved:', ':stuck_out_tongue_winking_eye:']
 
-  robot.hear /(who|what)('s| is) bebe/i, (res) ->
+  robot.hear /(who|what)('s|’s| is) bebe/i, (res) ->
     adoration = res.random adorations
     messages = ['your personal slack bot', 'the rocker of your world', 'the spoon to your pudding', 'the destroyer of worlds', 'a fan of the cookie monster']
 
