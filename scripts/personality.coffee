@@ -15,7 +15,7 @@ module.exports = (robot) ->
 
   robot.hear /(who|what)('s|’s| is) bebe/i, (res) ->
     adoration = res.random adorations
-    messages = ['your personal slack bot', 'the rocker of your world', 'the spoon to your pudding', 'the destroyer of worlds', 'a fan of the cookie monster']
+    messages = ['your personal slack bot', 'the rocker of worlds', 'the Luigi to your Mario', 'the destroyer of worlds', 'a fan of the cookie monster']
 
     res.send "I'm #{res.random messages}, #{res.random adorations}.  #{res.random emoticons_happy}"
 
