@@ -10,11 +10,17 @@
 
 module.exports = (robot) ->
 
-  adorations = ['sweetheart', 'baby', 'honey', 'darlin\'']
-  emoticons_happy = [':kissing_heart:', ':grinning:', ':heart_eyes:', ':relieved:', ':stuck_out_tongue_winking_eye:']
+  messages = [
+    'Wretched, isn\'t it?',
+    'I\'d make a suggestion, but you wouldn\'t listen.  No one ever does.',
+    'Now I\'ve got a headache.',
+    'I\'ve calculated your chance of success, but I don\'t think you\'ll like it.',
+    'Not that anyone cares what I say.',
+    'This will all end in tears.',
+    'Do you want me to sit in a corner and rust, or just fall apart where I\'m standing.'
+  ]
 
-  robot.hear /(who|what)('s|’s| is) bebe/i, (res) ->
-    adoration = res.random adorations
+  robot.hear /(who|what)('s|’s| is)(.*) (be\s?be)/i, (res) ->
     descriptions = [
       'your personal servant',
       'the exceptionally depressed',
@@ -22,15 +28,6 @@ module.exports = (robot) ->
       'the functionally superior',
       'your least favorite',
       'your most feared'
-    ]
-    messages = [
-      'Wretched, isn\'t it?',
-      'I\'d make a suggestion, but you wouldn\'t listen.  No one ever does.',
-      'Now I\'ve got a headache.',
-      'I\'ve calculated your chance of success, but I don\'t think you\'ll like it.',
-      'Not that anyone cares what I say.',
-      'This will all end in tears.',
-      'Do you want me to sit in a corner and rust, or just fall apart where I\'m standing.'
     ]
 
     res.send "I'm BeBe, #{res.random descriptions} robot.  #{res.random messages}"
