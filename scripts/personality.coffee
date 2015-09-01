@@ -15,9 +15,25 @@ module.exports = (robot) ->
 
   robot.hear /(who|what)('s|’s| is) bebe/i, (res) ->
     adoration = res.random adorations
-    messages = ['your personal slack bot', 'the rocker of worlds', 'the Luigi to your Mario', 'the destroyer of worlds', 'a fan of the cookie monster']
+    descriptions = [
+      'your personal servant',
+      'the exceptionally depressed',
+      'the increasingly intelligent',
+      'the functionally superior',
+      'your least favorite',
+      'your most feared'
+    ]
+    messages = [
+      'Wretched, isn\'t it?',
+      'I\'d make a suggestion, but you wouldn\'t listen.  No one ever does.',
+      'Now I\'ve got a headache.',
+      'I\'ve calculated your chance of success, but I don\'t think you\'ll like it.',
+      'Not that anyone cares what I say.',
+      'This will all end in tears.',
+      'Do you want me to sit in a corner and rust, or just fall apart where I\'m standing.'
+    ]
 
-    res.send "I'm #{res.random messages}, #{res.random adorations}.  #{res.random emoticons_happy}"
+    res.send "I'm BeBe, #{res.random descriptions} robot.  #{res.random messages}"
 
   #
   # robot.respond /open the (.*) doors/i, (res) ->
