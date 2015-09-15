@@ -25,29 +25,30 @@ urlBase = process.env.HUBOT_OCTOPUS_URL_BASE
 
 module.exports = (robot) ->
   robot.respond /(deploy|delpoy) status$/i, (msg) ->
-    getItems(robot, "api/dashboard")
+    getItems(robot, 'api/dashboard')
       .then (data) ->
-        m = "_We're currently rolling with_:"
-        for proj in data.Projects
-          if proj
-            m = m + "\n\n *Project*: " + proj.Name
-            projItems = _.filter(data.Items, (i) -> if i.ProjectId == proj.Id then i)
-
-            if projItems && projItems.length > 0
-              for item in projItems
-                if item
-                  enviro = _.find(data.Environments, (env) -> env.Id == item.EnvironmentId)
-                  tabset = enviro.Name.length > "\t" ? " : \t" : " : \t\t"
-                  formata = "\n  > %s\t\t : %s - %s"
-                  formatb = "\n  > %s\t : %s - %s"
-                  format = if enviro.Name.length >= 4 then formatb else formata
-                  robot.logger.info format
-                  m = m + util.format(format, enviro.Name, item.ReleaseVersion, item.State)
-            else
-              m = m + "\n  > No Deployments"
-        msg.send m
-      .catch (error) ->
-        msg.send error
+        data.Projects.forEach (project) ->
+          fields = []
+          deploys = _.filter(data.Items, (item) -> if item.ProjectId is project.Id then item)
+          data.Environments.forEach (env) ->
+            item = _.find(deploys, (item) -> item.EnvironmentId == env.Id)
+            version = (item.ReleaseVersion if item) || ''
+            state = (item.State if item) || ''
+            fields.push {
+              title: "#{env.Name}"
+              value: "#{version} (#{state})"
+              short: true
+            }
+          robot.emit 'slack-attachment',
+            text: "*#{project.Name}* is rolling with:"
+            content:
+              fallback: "#{project.Name} - #{}"
+              color: switch
+                when _.find(deploys, (item) -> item.State is 'Failed') then 'danger'
+                when _.find(deploys, (item) -> item.State == 'Executing') then 'warning'
+                else 'good'
+              fields: fields
+            channel: msg.message.room
 
   robot.respond /(deploy|delpoy) status table$/i, (msg) ->
     getItems(robot, 'api/dashboard')
@@ -130,6 +131,9 @@ module.exports = (robot) ->
         msg.send "Deploying #{this.release.Version} to #{targetEnvName}"
       .catch (error) ->
         msg.send error
+
+
+##############
 
 createHTTPCall = (robot, urlPath) ->
   robot.http("#{urlBase}/#{urlPath}")

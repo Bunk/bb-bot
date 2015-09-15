@@ -32,6 +32,18 @@ module.exports = (robot) ->
 
     res.send "I'm BeBe, #{res.random descriptions} robot.  #{res.random messages}"
 
+  robot.respond /emit (.*) to #(.*)/i, (res) ->
+    robot.emit 'slack-attachment',
+      message: res.match[1]
+      content:
+        text: "Attachment text"
+        fallback: "Attachment fallback"
+        fields: [{
+          title: "Field title"
+          value: "Field value"
+        }]
+      channel: res.match[2]
+
   #
   # robot.respond /open the (.*) doors/i, (res) ->
   #   doorType = res.match[1]

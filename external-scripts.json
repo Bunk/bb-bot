@@ -10,9 +10,9 @@
   "hubot-shipit",
   "hubot-standup-alarm",
   "hubot-voting",
-  "hubot-wikipedia",
   "hubot-reaction",
   "hubot-plusplus",
   "hubot-mute",
-  "hubot-eyebleach"
+  "hubot-eyebleach",
+  "hubot-zalgo"
 ]
